@@ -1,15 +1,58 @@
+version: '3.8'
+
 services:
+  # Service Database
+  database:
+    image: postgres:15
+    container_name: magang-database
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: cobaseeder
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - magang-network
+
+  # Service pgAdmin (SUDAH DIPERBAIKI)
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: magang-pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - database
+    networks:
+      - magang-network
+    # --- TAMBAHAN PENTING ---
+    # Ini agar konfigurasi server kamu disimpan permanen
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
+  # Service Backend
   backend:
     build: ./be
     container_name: magang-backend
     restart: always
     ports:
       - "3001:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@database:5432/cobaseeder?schema=public
+    depends_on:
+      - database
     volumes:
       - public-data:/app/public
     networks:
       - magang-network
 
+  # Service Frontend
   frontend:
     build: ./fe
     container_name: magang-frontend
@@ -21,9 +64,13 @@ services:
     networks:
       - magang-network
 
+# Daftar Volume
 volumes:
   public-data:
+  postgres-data:
+  pgadmin-data: # Volume baru untuk pgAdmin
 
 networks:
   magang-network:
     driver: bridge
+    
