@@ -1,0 +1,29 @@
+services:
+  backend:
+    build: ./be
+    container_name: magang-backend
+    restart: always
+    ports:
+      - "3001:3000"
+    volumes:
+      - public-data:/app/public
+    networks:
+      - magang-network
+
+  frontend:
+    build: ./fe
+    container_name: magang-frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - magang-network
+
+volumes:
+  public-data:
+
+networks:
+  magang-network:
+    driver: bridge
