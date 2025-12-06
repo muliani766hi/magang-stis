@@ -1,0 +1,23 @@
+/* custom-datatable.css */
+.mantine-DataTable-root,
+.mantine-DataTable-root table,
+.mantine-DataTable-root th,
+.mantine-DataTable-root td,
+.mantine-DataTable-root tr {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  background-image: none !important;
+}
+
+.mantine-DataTable-root thead tr {
+  border-bottom: none !important;
+}
+
+.mantine-DataTable-root tbody tr {
+  border-bottom: none !important;
+}
+
+.mantine-DataTable-root .mantine-ScrollArea-viewport {
+  border: none !important;
+}

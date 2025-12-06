@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "DokumenTranslok" ADD COLUMN     "update" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

@@ -1,0 +1,10 @@
+services:
+  backend:
+    build: .
+    restart: always
+    volumes:
+      - public-data:/app/public
+      
+volumes:
+  pgdata:
+  public-data:

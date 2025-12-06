@@ -1,0 +1,694 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Project "SIM 2.0" {
+  database_type: 'PostgreSQL'
+  Note: 'create file dbml'
+}
+
+Table TahunAjaran {
+  tahunAjaranId Int [pk, increment]
+  tahun String [unique, not null]
+  isActive Boolean [not null, default: false]
+  user User [not null]
+  kapasitasSatkerTahunAjaran KapasitasSatkerTahunAjaran [not null]
+  PeriodePemilihanTempatMagang PeriodePemilihanTempatMagang [not null]
+  PeriodePengumpulanLaporanMagang PeriodePengumpulanLaporanMagang [not null]
+  PeriodeKonfirmasiPemilihanSatker PeriodeKonfirmasiPemilihanSatker [not null]
+}
+
+Table User {
+  userId Int [pk, increment]
+  tahunAjaranId Int [not null]
+  email String [not null]
+  userName String
+  password String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  tahunAjaran TahunAjaran [not null]
+  mahasiswa Mahasiswa
+  adminSatker AdminSatker
+  adminProvinsi AdminProvinsi
+  pembimbingLapangan PembimbingLapangan
+  dosenPembimbingMagang DosenPembimbingMagang
+  userRoles UserRoles [not null]
+  Kabag Kabag
+}
+
+Table Roles {
+  roleId Int [pk, increment]
+  roleName String [unique, not null]
+  userRoles UserRoles [not null]
+  accesAlokasiMagang AccesAlokasiMagang [not null]
+  pengumuman Pengumuman [not null]
+}
+
+Table UserRoles {
+  id Int [pk, increment]
+  userId Int [not null]
+  roleId Int [not null]
+  user User [not null]
+  role Roles [not null]
+}
+
+Table DosenPembimbingMagang {
+  dosenId Int [pk, increment]
+  userId Int [unique, not null]
+  nip String [not null]
+  nama String [not null]
+  prodi String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  user User [not null]
+  mahasiswa Mahasiswa [not null]
+  bimbinganMagang BimbinganMagang [not null]
+}
+
+Table Mahasiswa {
+  mahasiswaId Int [pk, increment]
+  dosenId Int
+  pemlapId Int
+  userId Int [unique]
+  satkerId Int
+  nama String [not null]
+  nim String [not null]
+  email String
+  noHp String
+  noHpWali String
+  prodi String [not null]
+  kelas String
+  alamat String
+  alamatWali String
+  nomorRekening String
+  namaRekening String
+  bank String
+  statusRek String [default: 'kosong']
+  catatanRek String
+  kabupatenId Int
+  kabupaten KabupatenKota
+  kabupatenWaliId Int
+  kabupatenWali KabupatenKota
+  provinsiWaliId Int
+  provinsiWali Provinsi
+  lat Float
+  lng Float
+  statusPenempatan String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  satker Satker
+  pembimbingLapangan PembimbingLapangan
+  user User
+  laporanMagang LaporanMagang
+  dosenPembimbingMagang DosenPembimbingMagang
+  presensi Presensi [not null]
+  tipeKegiatan TipeKegiatan [not null]
+  izinPresensi IzinPresensi [not null]
+  pilihanSatker PilihanSatker [not null]
+  kegiatanHarian KegiatanHarian [not null]
+  presensiManual PresensiManual [not null]
+  rekapKegiatanBulanan RekapKegiatanBulanan [not null]
+  izinBimbinganSkripsi IzinBimbinganSkripsi [not null]
+  presentasiLaporanMagang PresentasiLaporanMagang [not null]
+  pesertaBimbinganMagang PesertaBimbinganMahasiswa [not null]
+  penilaian Penilaian
+  penempatan Penempatan [not null]
+  dokumenTranslok DokumenTranslok [not null]
+}
+
+Table AdminProvinsi {
+  adminProvinsiId Int [pk, increment]
+  userId Int [unique, not null]
+  provinsiId Int [unique, not null]
+  nama String [not null]
+  nip String [not null]
+  accesAlocation Boolean [not null, default: true]
+  user User [not null]
+  provinsi Provinsi [not null]
+}
+
+Table Provinsi {
+  provinsiId Int [pk, increment]
+  nama String [not null]
+  kodeProvinsi String [unique, not null]
+  adminProvinsi AdminProvinsi
+  satker Satker [not null]
+  kabupatenKota KabupatenKota [not null]
+  mahasiswaWali Mahasiswa [not null]
+}
+
+Table KabupatenKota {
+  kabupatenKotaId Int [pk, increment]
+  provinsiId Int [not null]
+  kodeKabupatenKota String [unique, not null]
+  nama String [not null]
+  provinsi Provinsi [not null]
+  satker Satker
+  mahasiswa Mahasiswa [not null]
+  mahasiswaWali Mahasiswa [not null]
+}
+
+Table AdminSatker {
+  adminSatkerId Int [pk, increment]
+  satkerId Int [unique]
+  userId Int [unique, not null]
+  nama String [not null]
+  nip String [not null]
+  user User [not null]
+  satker Satker
+}
+
+Table Satker {
+  satkerId Int [pk, increment]
+  povinsiId Int [not null]
+  kabupatenKotaId Int [unique]
+  nama String [not null]
+  kodeSatker String [unique, not null]
+  email String [not null]
+  alamat String [not null]
+  latitude Float
+  longitude Float
+  internalBPS Boolean [not null, default: true]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  adminSatker AdminSatker
+  provinsi Provinsi [not null]
+  kabupatenKota KabupatenKota
+  mahasiswa Mahasiswa [not null]
+  pilihanSatker PilihanSatker [not null]
+  penempatan Penempatan [not null]
+  pembimbingLapangan PembimbingLapangan [not null]
+  kapasitasSatkerTahunAjaran KapasitasSatkerTahunAjaran [not null]
+}
+
+Table KapasitasSatkerTahunAjaran {
+  kapasitasId Int [pk, increment]
+  satkerId Int [not null]
+  tahunAjaranId Int [not null]
+  kapasitas Int [default: 0]
+  satker Satker [not null]
+  tahunAjaran TahunAjaran [not null]
+
+  indexes {
+    (satkerId, tahunAjaranId) [unique]
+  }
+}
+
+Table PembimbingLapangan {
+  pemlapId Int [pk, increment]
+  userId Int [unique, not null]
+  satkerId Int [not null]
+  nip String [not null]
+  nama String [not null]
+  user User [not null]
+  satker Satker [not null]
+  mahasiswa Mahasiswa [not null]
+}
+
+Table IzinBimbinganSkripsi {
+  izinBimbinganId Int [pk, increment]
+  tanggal DateTime [not null]
+  jamMulai DateTime [not null]
+  jamSelesai DateTime [not null]
+  keterangan String [not null]
+  mahasiswaId Int [not null]
+  mahasiswa Mahasiswa [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table BimbinganMagang {
+  bimbinganId Int [pk, increment]
+  dosenId Int [not null]
+  tanggal DateTime [not null]
+  status String [not null]
+  tempat String [not null]
+  deskripsi String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  dosenPembimbingMagang DosenPembimbingMagang [not null]
+  PesertaBimbinganMahasiswa PesertaBimbinganMahasiswa [not null]
+}
+
+Table PesertaBimbinganMahasiswa {
+  pesertaBimbinganMagangId Int [pk, increment]
+  bimbinganId Int [not null]
+  mahasiswaId Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  bimbingan BimbinganMagang [not null]
+  mahasiswa Mahasiswa [not null]
+}
+
+Table TipeKegiatan {
+  tipeKegiatanId Int [pk, increment]
+  nama String [not null]
+  satuan String [not null]
+  mahasiswaId Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  mahasiswa Mahasiswa [not null]
+  kegiatanHarian KegiatanHarian [not null]
+  RekapKegiatanBulananTipeKegiatan RekapKegiatanBulananTipeKegiatan [not null]
+
+  indexes {
+    (nama, satuan, mahasiswaId) [unique]
+  }
+}
+
+Table KegiatanHarian {
+  kegiatanId Int [pk, increment]
+  tanggal DateTime [not null]
+  deskripsi String [not null]
+  volume Int [not null, default: 0]
+  durasi Float [not null, default: 0]
+  pemberiTugas String [not null]
+  statusPenyelesaian Int [not null, default: 0]
+  isFinal Boolean [not null, default: false]
+  mahasiswaId Int [not null]
+  tipeKegiatanId Int
+  tim String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  mahasiswa Mahasiswa [not null]
+  tipeKegiatan TipeKegiatan
+}
+
+Table RekapKegiatanBulanan {
+  rekapId Int [pk, increment]
+  tanggalAwal DateTime [not null]
+  tanggalAkhir DateTime [not null]
+  isFinal Boolean [not null, default: false]
+  mahasiswaId Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  mahasiswa Mahasiswa [not null]
+  RekapKegiatanBulananTipeKegiatan RekapKegiatanBulananTipeKegiatan [not null]
+
+  indexes {
+    (tanggalAwal, tanggalAkhir, mahasiswaId) [unique]
+  }
+}
+
+Table RekapKegiatanBulananTipeKegiatan {
+  rekapTipeId Int [pk, increment]
+  rekapId Int [not null]
+  tipeKegiatanId Int [not null]
+  uraian String [not null]
+  target Int [not null, default: 0]
+  realisasi Int [not null, default: 0]
+  persentase Float [not null, default: 0]
+  tingkatKualitas Int [default: 0]
+  keterangan String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  rekapKegiatan RekapKegiatanBulanan [not null]
+  tipeKegiatan TipeKegiatan [not null]
+}
+
+Table Presensi {
+  presensiId Int [pk, increment]
+  tanggal DateTime [not null]
+  waktuDatang DateTime
+  waktuPulang DateTime
+  status String [not null, default: 'Tidak Hadir']
+  jumlahJamKerja Float [default: 0]
+  statusJamKerja String [default: 'Jam kerja kurang']
+  durasiJamKerja Float [default: 0]
+  bobotKetidakHadiran Float [default: 0]
+  mahasiswaId Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  mahasiswa Mahasiswa [not null]
+
+  indexes {
+    (tanggal, mahasiswaId) [unique]
+  }
+}
+
+Table PresensiManual {
+  presensiManualId Int [pk, increment]
+  tanggal DateTime [not null]
+  bukti String
+  keterangan String
+  status String [not null, default: 'Menunggu']
+  mahasiswaId Int [not null]
+  disetujui Boolean [not null, default: false]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  mahasiswa Mahasiswa [not null]
+}
+
+Table IzinPresensi {
+  izinId Int [pk, increment]
+  tanggal DateTime
+  keterangan String
+  jenisIzin String [default: 'Lainnya']
+  fileBukti String
+  status String [default: 'Menunggu']
+  mahasiswaId Int [not null]
+  createdAt DateTime [default: `now()`]
+  updatedAt DateTime
+  mahasiswa Mahasiswa [not null]
+}
+
+Table InvalidToken {
+  id Int [pk, increment]
+  token String [unique, not null]
+  createdAt DateTime [default: `now()`]
+  updatedAt DateTime
+}
+
+Table PilihanSatker {
+  pilihanSatkerId Int [pk, increment]
+  mahasiswaId Int [not null]
+  satkerId Int [not null]
+  status String [not null, default: 'Menunggu']
+  konfirmasiTimMagang Boolean [not null, default: false]
+  isActive Boolean [not null, default: true]
+  prioritas Int [not null, default: 0]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  mahasiswa Mahasiswa [not null]
+  satker Satker [not null]
+}
+
+Table Penempatan {
+  id Int [pk, increment]
+  mahasiswaId Int [not null]
+  satkerId Int [not null]
+  createdAt DateTime [default: `now()`]
+  updatedAt DateTime
+  mahasiswa Mahasiswa [not null]
+  satker Satker [not null]
+}
+
+Table LaporanMagang {
+  laporanId Int [pk, increment]
+  mahasiswaId Int [unique, not null]
+  tanggal DateTime
+  fileLaporan String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  mahasiswa Mahasiswa [not null]
+}
+
+Table PresentasiLaporanMagang {
+  presentasiId Int [pk, increment]
+  mahasiswaId Int [unique, not null]
+  tanggal DateTime
+  jumlahPenonton Int
+  lokasiPresentasi String
+  metodePresentasi String [default: 'Individu']
+  fileDraftLaporanMagang String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  mahasiswa Mahasiswa [not null]
+}
+
+Table Penilaian {
+  penilianId Int [pk, increment]
+  mahasiswaId Int [unique, not null]
+  mahasiswa Mahasiswa [not null]
+  PenilaianBimbingan PenilaianBimbingan
+  PenilaianKinerja PenilaianKinerja
+  PenilaianLaporanDosen PenilaianLaporanDosen
+  PenilaianLaporanPemlap PenilaianLaporanPemlap
+
+  indexes {
+    (mahasiswaId, penilianId) [unique]
+  }
+}
+
+Table PenilaianBimbingan {
+  penilaianBimbinganId Int [pk, increment]
+  penilianId Int [unique, not null]
+  inisiatif Int [not null, default: 50]
+  disiplin Int [not null, default: 50]
+  ketekunan Int [not null, default: 50]
+  kemampuanBerfikir Int [not null, default: 50]
+  komunikasi Int [not null, default: 50]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  penilaian Penilaian [not null]
+
+  indexes {
+    (penilianId, penilaianBimbinganId) [unique]
+  }
+}
+
+Table PenilaianKinerja {
+  penilaianKinerjaId Int [pk, increment]
+  penilianId Int [unique, not null]
+  initiatif Int [not null, default: 50]
+  disiplin Int [not null, default: 50]
+  ketekunan Int [not null, default: 50]
+  kemampuanBerfikir Int [not null, default: 50]
+  kemampuanBeradaptasi Int [not null, default: 50]
+  komunikasi Int [not null, default: 50]
+  penampilan Int [not null, default: 50]
+  teknikal Int [not null, default: 50]
+  kerjasama Int [not null, default: 50]
+  hasil Int [not null, default: 50]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  penilaian Penilaian [not null]
+
+  indexes {
+    (penilianId, penilaianKinerjaId) [unique]
+  }
+}
+
+Table PenilaianLaporanDosen {
+  penilaianLaporanDosenId Int [pk, increment]
+  penilianId Int [unique, not null]
+  var1 Int [not null, default: 50]
+  var2 Int [not null, default: 50]
+  var3 Int [not null, default: 50]
+  var4 Int [not null, default: 50]
+  var5 Int [not null, default: 50]
+  var6 Int [not null, default: 50]
+  var7 Int [not null, default: 50]
+  var8 Int [not null, default: 50]
+  var9 Int [not null, default: 50]
+  var10 Int [not null, default: 50]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  penilaian Penilaian [not null]
+
+  indexes {
+    (penilianId, penilaianLaporanDosenId) [unique]
+  }
+}
+
+Table PenilaianLaporanPemlap {
+  penilaianLaporanPemlapId Int [pk, increment]
+  penilianId Int [unique, not null]
+  var1 Int [not null, default: 50]
+  var2 Int [not null, default: 50]
+  var3 Int [not null, default: 50]
+  var4 Int [not null, default: 50]
+  var5 Int [not null, default: 50]
+  var6 Int [not null, default: 50]
+  var7 Int [not null, default: 50]
+  var8 Int [not null, default: 50]
+  var9 Int [not null, default: 50]
+  var10 Int [not null, default: 50]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  penilaian Penilaian [not null]
+
+  indexes {
+    (penilianId, penilaianLaporanPemlapId) [unique]
+  }
+}
+
+Table PeriodePemilihanTempatMagang {
+  periodePemilihanTempatMagangId Int [pk, increment]
+  tahunAjaranId Int [not null]
+  tanggalMulai DateTime [not null]
+  tanggalAkhir DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  tahunAjaran TahunAjaran [not null]
+
+  indexes {
+    (tahunAjaranId, periodePemilihanTempatMagangId) [unique]
+  }
+}
+
+Table PeriodeKonfirmasiPemilihanSatker {
+  periodeKonfirmasiPemilihanSatkerId Int [pk, increment]
+  tahunAjaranId Int [not null]
+  tanggalMulai DateTime [not null]
+  tanggalAkhir DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  tahunAjaran TahunAjaran [not null]
+
+  indexes {
+    (tahunAjaranId, periodeKonfirmasiPemilihanSatkerId) [unique]
+  }
+}
+
+Table PeriodePengumpulanLaporanMagang {
+  periodePengumpulanLaporanMagangId Int [pk, increment]
+  tahunAjaranId Int [not null]
+  tanggalMulai DateTime [not null]
+  tanggalAkhir DateTime [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  tahunAjaran TahunAjaran [not null]
+
+  indexes {
+    (tahunAjaranId, periodePengumpulanLaporanMagangId) [unique]
+  }
+}
+
+Table AccesAlokasiMagang {
+  id Int [pk, increment]
+  status Boolean [not null]
+  roleId Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  role Roles [not null]
+}
+
+Table Pengumuman {
+  id Int [pk, increment]
+  judul String [not null]
+  deskripsi String [not null]
+  roleId Int [not null]
+  groupId Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  role Roles [not null]
+}
+
+Table DokumenTranslok {
+  id Int [pk, increment]
+  bulan DateTime
+  fileDokumenTranslok String
+  mahasiswaId Int [not null]
+  status String [default: 'menunggu']
+  catatan String
+  updateKe Int [not null, default: 0]
+  update DateTime [default: `now()`, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  mahasiswa Mahasiswa [not null]
+}
+
+Table Kabag {
+  id Int [pk, increment]
+  userId Int [unique, not null]
+  nama String [not null]
+  nip String [not null]
+  user User [not null]
+}
+
+Ref: User.tahunAjaranId > TahunAjaran.tahunAjaranId [delete: Cascade]
+
+Ref: UserRoles.userId > User.userId [delete: Cascade]
+
+Ref: UserRoles.roleId > Roles.roleId [delete: Cascade]
+
+Ref: DosenPembimbingMagang.userId - User.userId [delete: Cascade]
+
+Ref: Mahasiswa.kabupatenId > KabupatenKota.kabupatenKotaId [delete: Set Null]
+
+Ref: Mahasiswa.kabupatenWaliId > KabupatenKota.kabupatenKotaId [delete: Set Null]
+
+Ref: Mahasiswa.provinsiWaliId > Provinsi.provinsiId
+
+Ref: Mahasiswa.satkerId > Satker.satkerId [delete: Set Null]
+
+Ref: Mahasiswa.pemlapId > PembimbingLapangan.pemlapId [delete: Set Null]
+
+Ref: Mahasiswa.userId - User.userId [delete: Cascade]
+
+Ref: Mahasiswa.dosenId > DosenPembimbingMagang.dosenId [delete: Set Null]
+
+Ref: AdminProvinsi.userId - User.userId [delete: Cascade]
+
+Ref: AdminProvinsi.provinsiId - Provinsi.provinsiId [delete: Cascade]
+
+Ref: KabupatenKota.provinsiId > Provinsi.provinsiId [delete: Cascade]
+
+Ref: AdminSatker.userId - User.userId [delete: Cascade]
+
+Ref: AdminSatker.satkerId - Satker.satkerId [delete: Set Null]
+
+Ref: Satker.povinsiId > Provinsi.provinsiId [delete: Cascade]
+
+Ref: Satker.kabupatenKotaId - KabupatenKota.kabupatenKotaId [delete: Cascade]
+
+Ref: KapasitasSatkerTahunAjaran.satkerId > Satker.satkerId [delete: Cascade]
+
+Ref: KapasitasSatkerTahunAjaran.tahunAjaranId > TahunAjaran.tahunAjaranId [delete: Cascade]
+
+Ref: PembimbingLapangan.userId - User.userId [delete: Cascade]
+
+Ref: PembimbingLapangan.satkerId > Satker.satkerId [delete: Cascade]
+
+Ref: IzinBimbinganSkripsi.mahasiswaId > Mahasiswa.mahasiswaId [delete: Cascade]
+
+Ref: BimbinganMagang.dosenId > DosenPembimbingMagang.dosenId [delete: Cascade]
+
+Ref: PesertaBimbinganMahasiswa.bimbinganId > BimbinganMagang.bimbinganId [delete: Cascade]
+
+Ref: PesertaBimbinganMahasiswa.mahasiswaId > Mahasiswa.mahasiswaId [delete: Cascade]
+
+Ref: TipeKegiatan.mahasiswaId > Mahasiswa.mahasiswaId [delete: Cascade]
+
+Ref: KegiatanHarian.mahasiswaId > Mahasiswa.mahasiswaId [delete: Cascade]
+
+Ref: KegiatanHarian.tipeKegiatanId > TipeKegiatan.tipeKegiatanId [delete: Cascade]
+
+Ref: RekapKegiatanBulanan.mahasiswaId > Mahasiswa.mahasiswaId [delete: Cascade]
+
+Ref: RekapKegiatanBulananTipeKegiatan.rekapId > RekapKegiatanBulanan.rekapId [delete: Cascade]
+
+Ref: RekapKegiatanBulananTipeKegiatan.tipeKegiatanId > TipeKegiatan.tipeKegiatanId [delete: Cascade]
+
+Ref: Presensi.mahasiswaId > Mahasiswa.mahasiswaId [delete: Cascade]
+
+Ref: PresensiManual.mahasiswaId > Mahasiswa.mahasiswaId [delete: Cascade]
+
+Ref: IzinPresensi.mahasiswaId > Mahasiswa.mahasiswaId [delete: Cascade]
+
+Ref: PilihanSatker.mahasiswaId > Mahasiswa.mahasiswaId [delete: Cascade]
+
+Ref: PilihanSatker.satkerId > Satker.satkerId [delete: Cascade]
+
+Ref: Penempatan.mahasiswaId > Mahasiswa.mahasiswaId [delete: Cascade]
+
+Ref: Penempatan.satkerId > Satker.satkerId [delete: Cascade]
+
+Ref: LaporanMagang.mahasiswaId - Mahasiswa.mahasiswaId [delete: Cascade]
+
+Ref: PresentasiLaporanMagang.mahasiswaId > Mahasiswa.mahasiswaId [delete: Cascade]
+
+Ref: Penilaian.mahasiswaId - Mahasiswa.mahasiswaId [delete: Cascade]
+
+Ref: PenilaianBimbingan.penilianId - Penilaian.penilianId [delete: Cascade]
+
+Ref: PenilaianKinerja.penilianId - Penilaian.penilianId [delete: Cascade]
+
+Ref: PenilaianLaporanDosen.penilianId - Penilaian.penilianId [delete: Cascade]
+
+Ref: PenilaianLaporanPemlap.penilianId - Penilaian.penilianId [delete: Cascade]
+
+Ref: PeriodePemilihanTempatMagang.tahunAjaranId > TahunAjaran.tahunAjaranId [delete: Cascade]
+
+Ref: PeriodeKonfirmasiPemilihanSatker.tahunAjaranId > TahunAjaran.tahunAjaranId [delete: Cascade]
+
+Ref: PeriodePengumpulanLaporanMagang.tahunAjaranId > TahunAjaran.tahunAjaranId [delete: Cascade]
+
+Ref: AccesAlokasiMagang.roleId > Roles.roleId [delete: Cascade]
+
+Ref: Pengumuman.roleId > Roles.roleId [delete: Cascade]
+
+Ref: DokumenTranslok.mahasiswaId > Mahasiswa.mahasiswaId [delete: Cascade]
+
+Ref: Kabag.userId - User.userId [delete: Cascade]

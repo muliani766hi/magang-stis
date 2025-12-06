@@ -1,0 +1,645 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator dbml {
+  provider            = "prisma-dbml-generator"
+  outputName          = "sim_2.0.dbml"
+  projectName         = "SIM 2.0"
+  projectDatabaseType = "PostgreSQL"
+  projectNote         = "create file dbml"
+}
+
+generator client {
+  provider = "prisma-client-js"
+  // output = "../../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  // url      = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
+  // directUrl = env("DIRECT_URL")
+}
+
+// generator markdown {
+//   provider = "prisma-markdown"
+//   output   = "./ERD.md"
+//   title    = "Shopping Mall"
+// }
+
+generator nestjsDto {
+  provider                        = "prisma-generator-nestjs-dto"
+  output                          = "../src/generated/nestjs-dto"
+  outputToNestJsResourceStructure = "true"
+  exportRelationModifierClasses   = "true"
+  reExport                        = "false"
+  createDtoPrefix                 = "Create"
+  updateDtoPrefix                 = "Update"
+  dtoSuffix                       = "Dto"
+  entityPrefix                    = ""
+  entitySuffix                    = ""
+  fileNamingStyle                 = "camel"
+}
+
+model TahunAjaran {
+  tahunAjaranId Int     @id @default(autoincrement())
+  tahun         String  @unique
+  isActive      Boolean @default(false)
+
+  user                             User[]
+  kapasitasSatkerTahunAjaran       KapasitasSatkerTahunAjaran[]
+  PeriodePemilihanTempatMagang     PeriodePemilihanTempatMagang[]
+  PeriodePengumpulanLaporanMagang  PeriodePengumpulanLaporanMagang[]
+  PeriodeKonfirmasiPemilihanSatker PeriodeKonfirmasiPemilihanSatker[]
+}
+
+model User {
+  userId        Int      @id @default(autoincrement())
+  tahunAjaranId Int
+  email         String
+  userName      String?
+  password      String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  tahunAjaran           TahunAjaran            @relation(fields: [tahunAjaranId], references: [tahunAjaranId], onDelete: Cascade, onUpdate: Cascade)
+  mahasiswa             Mahasiswa?
+  adminSatker           AdminSatker?
+  adminProvinsi         AdminProvinsi?
+  pembimbingLapangan    PembimbingLapangan?
+  dosenPembimbingMagang DosenPembimbingMagang?
+  userRoles             UserRoles[]
+  Kabag                 Kabag?
+}
+
+model Roles {
+  roleId   Int    @id @default(autoincrement())
+  roleName String @unique
+
+  userRoles          UserRoles[]
+  accesAlokasiMagang AccesAlokasiMagang[]
+  pengumuman         Pengumuman[]
+}
+
+model UserRoles {
+  id     Int @id @default(autoincrement())
+  userId Int
+  roleId Int
+
+  user User  @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
+  role Roles @relation(fields: [roleId], references: [roleId], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model DosenPembimbingMagang {
+  dosenId   Int      @id @default(autoincrement())
+  userId    Int      @unique
+  nip       String
+  nama      String
+  prodi     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user            User              @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
+  mahasiswa       Mahasiswa[]
+  bimbinganMagang BimbinganMagang[]
+}
+
+model Mahasiswa {
+  mahasiswaId   Int     @id @default(autoincrement())
+  dosenId       Int?
+  pemlapId      Int?
+  userId        Int?    @unique
+  satkerId      Int?
+  nama          String
+  nim           String
+  email         String?
+  noHp          String?
+  noHpWali      String?
+  prodi         String
+  kelas         String?
+  alamat        String?
+  alamatWali    String?
+  nomorRekening String?
+  namaRekening  String?
+  bank          String?
+  statusRek     String? @default("kosong")
+  catatanRek    String?
+
+  kabupatenId Int?
+  kabupaten   KabupatenKota? @relation("KabupatenDomisili", fields: [kabupatenId], references: [kabupatenKotaId], onDelete: SetNull)
+
+  kabupatenWaliId Int?
+  kabupatenWali   KabupatenKota? @relation("KabupatenWali", fields: [kabupatenWaliId], references: [kabupatenKotaId], onDelete: SetNull)
+
+  provinsiWaliId Int?
+  provinsiWali   Provinsi? @relation("ProvinsiWali", fields: [provinsiWaliId], references: [provinsiId])
+
+  lat              Float?
+  lng              Float?
+  statusPenempatan String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  satker                  Satker?                     @relation(fields: [satkerId], references: [satkerId], onDelete: SetNull, onUpdate: Cascade)
+  pembimbingLapangan      PembimbingLapangan?         @relation(fields: [pemlapId], references: [pemlapId], onDelete: SetNull, onUpdate: Cascade)
+  user                    User?                       @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
+  laporanMagang           LaporanMagang?
+  dosenPembimbingMagang   DosenPembimbingMagang?      @relation(fields: [dosenId], references: [dosenId], onDelete: SetNull, onUpdate: Cascade)
+  presensi                Presensi[]
+  tipeKegiatan            TipeKegiatan[]
+  izinPresensi            IzinPresensi[]
+  pilihanSatker           PilihanSatker[]
+  kegiatanHarian          KegiatanHarian[]
+  presensiManual          PresensiManual[]
+  rekapKegiatanBulanan    RekapKegiatanBulanan[]
+  izinBimbinganSkripsi    IzinBimbinganSkripsi[]
+  presentasiLaporanMagang PresentasiLaporanMagang[]
+  pesertaBimbinganMagang  PesertaBimbinganMahasiswa[]
+  penilaian               Penilaian?
+  penempatan              Penempatan[]
+  dokumenTranslok         DokumenTranslok[]
+}
+
+model AdminProvinsi {
+  adminProvinsiId Int      @id @default(autoincrement())
+  userId          Int      @unique
+  provinsiId      Int      @unique
+  nama            String
+  nip             String
+  accesAlocation  Boolean  @default(true)
+  user            User     @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
+  provinsi        Provinsi @relation(fields: [provinsiId], references: [provinsiId], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model Provinsi {
+  provinsiId   Int    @id @default(autoincrement())
+  nama         String
+  kodeProvinsi String @unique
+
+  adminProvinsi AdminProvinsi?
+  satker        Satker[]
+  kabupatenKota KabupatenKota[]
+  mahasiswaWali Mahasiswa[]     @relation("ProvinsiWali")
+}
+
+model KabupatenKota {
+  kabupatenKotaId   Int    @id @unique @default(autoincrement())
+  provinsiId        Int
+  kodeKabupatenKota String @unique
+  nama              String
+
+  provinsi Provinsi @relation(fields: [provinsiId], references: [provinsiId], onDelete: Cascade, onUpdate: Cascade)
+  satker   Satker?
+
+  mahasiswa     Mahasiswa[] @relation("KabupatenDomisili")
+  mahasiswaWali Mahasiswa[] @relation("KabupatenWali")
+}
+
+model AdminSatker {
+  adminSatkerId Int    @id @default(autoincrement())
+  satkerId      Int?   @unique
+  userId        Int    @unique
+  nama          String
+  nip           String
+
+  user   User    @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
+  satker Satker? @relation(fields: [satkerId], references: [satkerId], onDelete: SetNull, onUpdate: Cascade)
+}
+
+model Satker {
+  satkerId        Int      @id @default(autoincrement())
+  povinsiId       Int
+  kabupatenKotaId Int?     @unique
+  nama            String
+  kodeSatker      String   @unique
+  email           String
+  alamat          String
+  latitude        Float?
+  longitude       Float?
+  internalBPS     Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt()
+
+  adminSatker                AdminSatker?
+  provinsi                   Provinsi                     @relation(fields: [povinsiId], references: [provinsiId], onDelete: Cascade, onUpdate: Cascade)
+  kabupatenKota              KabupatenKota?               @relation(fields: [kabupatenKotaId], references: [kabupatenKotaId], onDelete: Cascade, onUpdate: Cascade)
+  mahasiswa                  Mahasiswa[]
+  pilihanSatker              PilihanSatker[]
+  penempatan                 Penempatan[]
+  pembimbingLapangan         PembimbingLapangan[]
+  kapasitasSatkerTahunAjaran KapasitasSatkerTahunAjaran[]
+}
+
+model KapasitasSatkerTahunAjaran {
+  kapasitasId   Int  @id @default(autoincrement())
+  satkerId      Int
+  tahunAjaranId Int
+  kapasitas     Int? @default(0)
+
+  satker      Satker      @relation(fields: [satkerId], references: [satkerId], onDelete: Cascade, onUpdate: Cascade)
+  tahunAjaran TahunAjaran @relation(fields: [tahunAjaranId], references: [tahunAjaranId], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([satkerId, tahunAjaranId])
+}
+
+model PembimbingLapangan {
+  pemlapId Int    @id @default(autoincrement())
+  userId   Int    @unique
+  satkerId Int
+  nip      String
+  nama     String
+
+  user      User        @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
+  satker    Satker      @relation(fields: [satkerId], references: [satkerId], onDelete: Cascade, onUpdate: Cascade)
+  mahasiswa Mahasiswa[]
+}
+
+model IzinBimbinganSkripsi {
+  izinBimbinganId Int      @id @default(autoincrement())
+  tanggal         DateTime
+  jamMulai        DateTime
+  jamSelesai      DateTime
+  keterangan      String
+  mahasiswaId     Int
+
+  mahasiswa Mahasiswa @relation(fields: [mahasiswaId], references: [mahasiswaId], onDelete: Cascade, onUpdate: Cascade)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model BimbinganMagang {
+  bimbinganId Int      @id @default(autoincrement())
+  dosenId     Int
+  tanggal     DateTime
+  status      String
+  tempat      String
+  deskripsi   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  dosenPembimbingMagang     DosenPembimbingMagang       @relation(fields: [dosenId], references: [dosenId], onDelete: Cascade, onUpdate: Cascade)
+  PesertaBimbinganMahasiswa PesertaBimbinganMahasiswa[]
+}
+
+model PesertaBimbinganMahasiswa {
+  pesertaBimbinganMagangId Int      @id @default(autoincrement())
+  bimbinganId              Int
+  mahasiswaId              Int
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  bimbingan BimbinganMagang @relation(fields: [bimbinganId], references: [bimbinganId], onDelete: Cascade, onUpdate: Cascade)
+  mahasiswa Mahasiswa       @relation(fields: [mahasiswaId], references: [mahasiswaId], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model TipeKegiatan {
+  tipeKegiatanId Int      @id @default(autoincrement())
+  nama           String
+  satuan         String
+  mahasiswaId    Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  mahasiswa                        Mahasiswa                          @relation(fields: [mahasiswaId], references: [mahasiswaId], onDelete: Cascade, onUpdate: Cascade)
+  kegiatanHarian                   KegiatanHarian[]
+  RekapKegiatanBulananTipeKegiatan RekapKegiatanBulananTipeKegiatan[]
+
+  @@unique([nama, satuan, mahasiswaId])
+}
+
+model KegiatanHarian {
+  kegiatanId         Int      @id @default(autoincrement())
+  tanggal            DateTime
+  deskripsi          String
+  volume             Int      @default(0)
+  durasi             Float    @default(0)
+  pemberiTugas       String
+  statusPenyelesaian Int      @default(0)
+  isFinal            Boolean  @default(false)
+  mahasiswaId        Int
+  tipeKegiatanId     Int?
+  tim                String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  mahasiswa    Mahasiswa     @relation(fields: [mahasiswaId], references: [mahasiswaId], onDelete: Cascade, onUpdate: Cascade)
+  tipeKegiatan TipeKegiatan? @relation(fields: [tipeKegiatanId], references: [tipeKegiatanId], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model RekapKegiatanBulanan {
+  rekapId                          Int                                @id @default(autoincrement())
+  tanggalAwal                      DateTime
+  tanggalAkhir                     DateTime
+  isFinal                          Boolean                            @default(false)
+  mahasiswaId                      Int
+  createdAt                        DateTime                           @default(now())
+  updatedAt                        DateTime                           @updatedAt
+  //bulan     DateTime?
+  mahasiswa                        Mahasiswa                          @relation(fields: [mahasiswaId], references: [mahasiswaId], onDelete: Cascade, onUpdate: Cascade)
+  RekapKegiatanBulananTipeKegiatan RekapKegiatanBulananTipeKegiatan[]
+
+  @@unique([tanggalAwal, tanggalAkhir, mahasiswaId])
+}
+
+model RekapKegiatanBulananTipeKegiatan {
+  rekapTipeId     Int      @id @default(autoincrement())
+  rekapId         Int
+  tipeKegiatanId  Int
+  uraian          String
+  target          Int      @default(0)
+  realisasi       Int      @default(0)
+  persentase      Float    @default(0)
+  tingkatKualitas Int?     @default(0)
+  keterangan      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  rekapKegiatan RekapKegiatanBulanan @relation(fields: [rekapId], references: [rekapId], onDelete: Cascade, onUpdate: Cascade)
+  tipeKegiatan  TipeKegiatan         @relation(fields: [tipeKegiatanId], references: [tipeKegiatanId], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model Presensi {
+  presensiId          Int       @id @default(autoincrement())
+  tanggal             DateTime
+  waktuDatang         DateTime?
+  waktuPulang         DateTime?
+  status              String    @default("Tidak Hadir")
+  jumlahJamKerja      Float?    @default(0)
+  statusJamKerja      String?   @default("Jam kerja kurang")
+  durasiJamKerja      Float?    @default(0)
+  bobotKetidakHadiran Float?    @default(0)
+  mahasiswaId         Int
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  mahasiswa Mahasiswa @relation(fields: [mahasiswaId], references: [mahasiswaId], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([tanggal, mahasiswaId])
+}
+
+model PresensiManual {
+  presensiManualId Int      @id @default(autoincrement())
+  tanggal          DateTime
+  bukti            String?
+  keterangan       String?
+  status           String   @default("Menunggu")
+  mahasiswaId      Int
+  disetujui        Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  mahasiswa Mahasiswa @relation(fields: [mahasiswaId], references: [mahasiswaId], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model IzinPresensi {
+  izinId      Int       @id @default(autoincrement())
+  tanggal     DateTime?
+  keterangan  String?
+  jenisIzin   String?   @default("Lainnya")
+  fileBukti   String?
+  status      String?   @default("Menunggu")
+  mahasiswaId Int
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @updatedAt
+
+  mahasiswa Mahasiswa @relation(fields: [mahasiswaId], references: [mahasiswaId], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model InvalidToken {
+  id        Int       @id @unique @default(autoincrement())
+  token     String    @unique
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+}
+
+model PilihanSatker {
+  pilihanSatkerId     Int      @id @default(autoincrement())
+  mahasiswaId         Int
+  satkerId            Int
+  status              String   @default("Menunggu") // Menunggu, Diterima, Ditolak (ini adalah status temporary berdasarkan pilihan)
+  konfirmasiTimMagang Boolean  @default(false)
+  isActive            Boolean  @default(true)
+  prioritas           Int      @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  mahasiswa Mahasiswa @relation(fields: [mahasiswaId], references: [mahasiswaId], onDelete: Cascade, onUpdate: Cascade)
+  satker    Satker    @relation(fields: [satkerId], references: [satkerId], onDelete: Cascade, onUpdate: Cascade)
+
+  // @@unique([mahasiswaId, satkerId])
+}
+
+model Penempatan {
+  id          Int       @id @unique @default(autoincrement())
+  mahasiswaId Int
+  satkerId    Int
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @updatedAt
+
+  mahasiswa Mahasiswa @relation(fields: [mahasiswaId], references: [mahasiswaId], onDelete: Cascade, onUpdate: Cascade)
+  satker    Satker    @relation(fields: [satkerId], references: [satkerId], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model LaporanMagang {
+  laporanId   Int       @id @default(autoincrement())
+  mahasiswaId Int       @unique
+  tanggal     DateTime?
+  fileLaporan String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  mahasiswa Mahasiswa @relation(fields: [mahasiswaId], references: [mahasiswaId], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model PresentasiLaporanMagang {
+  presentasiId           Int       @id @default(autoincrement())
+  mahasiswaId            Int       @unique
+  tanggal                DateTime?
+  jumlahPenonton         Int?
+  lokasiPresentasi       String?
+  metodePresentasi       String?   @default("Individu")
+  fileDraftLaporanMagang String?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  mahasiswa Mahasiswa @relation(fields: [mahasiswaId], references: [mahasiswaId], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model Penilaian {
+  penilianId  Int @id @default(autoincrement())
+  mahasiswaId Int @unique
+
+  mahasiswa              Mahasiswa               @relation(fields: [mahasiswaId], references: [mahasiswaId], onDelete: Cascade, onUpdate: Cascade)
+  PenilaianBimbingan     PenilaianBimbingan?
+  PenilaianKinerja       PenilaianKinerja?
+  PenilaianLaporanDosen  PenilaianLaporanDosen?
+  PenilaianLaporanPemlap PenilaianLaporanPemlap?
+
+  @@unique([mahasiswaId, penilianId])
+}
+
+model PenilaianBimbingan {
+  penilaianBimbinganId Int      @id @default(autoincrement())
+  penilianId           Int      @unique
+  inisiatif            Int      @default(50)
+  disiplin             Int      @default(50)
+  ketekunan            Int      @default(50)
+  kemampuanBerfikir    Int      @default(50)
+  komunikasi           Int      @default(50)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  penilaian Penilaian @relation(fields: [penilianId], references: [penilianId], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([penilianId, penilaianBimbinganId])
+}
+
+model PenilaianKinerja {
+  penilaianKinerjaId   Int      @id @default(autoincrement())
+  penilianId           Int      @unique
+  initiatif            Int      @default(50)
+  disiplin             Int      @default(50)
+  ketekunan            Int      @default(50)
+  kemampuanBerfikir    Int      @default(50)
+  kemampuanBeradaptasi Int      @default(50)
+  komunikasi           Int      @default(50)
+  penampilan           Int      @default(50)
+  teknikal             Int      @default(50)
+  kerjasama            Int      @default(50)
+  hasil                Int      @default(50)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  penilaian Penilaian @relation(fields: [penilianId], references: [penilianId], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([penilianId, penilaianKinerjaId])
+}
+
+model PenilaianLaporanDosen {
+  penilaianLaporanDosenId Int      @id @default(autoincrement())
+  penilianId              Int      @unique
+  var1                    Int      @default(50)
+  var2                    Int      @default(50)
+  var3                    Int      @default(50)
+  var4                    Int      @default(50)
+  var5                    Int      @default(50)
+  var6                    Int      @default(50)
+  var7                    Int      @default(50)
+  var8                    Int      @default(50)
+  var9                    Int      @default(50)
+  var10                   Int      @default(50)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  penilaian Penilaian @relation(fields: [penilianId], references: [penilianId], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([penilianId, penilaianLaporanDosenId])
+}
+
+model PenilaianLaporanPemlap {
+  penilaianLaporanPemlapId Int      @id @default(autoincrement())
+  penilianId               Int      @unique
+  var1                     Int      @default(50)
+  var2                     Int      @default(50)
+  var3                     Int      @default(50)
+  var4                     Int      @default(50)
+  var5                     Int      @default(50)
+  var6                     Int      @default(50)
+  var7                     Int      @default(50)
+  var8                     Int      @default(50)
+  var9                     Int      @default(50)
+  var10                    Int      @default(50)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  penilaian Penilaian @relation(fields: [penilianId], references: [penilianId], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([penilianId, penilaianLaporanPemlapId])
+}
+
+model PeriodePemilihanTempatMagang {
+  periodePemilihanTempatMagangId Int      @id @default(autoincrement())
+  tahunAjaranId                  Int
+  tanggalMulai                   DateTime
+  tanggalAkhir                   DateTime
+  createdAt                      DateTime @default(now())
+  updatedAt                      DateTime @updatedAt
+
+  tahunAjaran TahunAjaran @relation(fields: [tahunAjaranId], references: [tahunAjaranId], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([tahunAjaranId, periodePemilihanTempatMagangId])
+}
+
+model PeriodeKonfirmasiPemilihanSatker {
+  periodeKonfirmasiPemilihanSatkerId Int      @id @default(autoincrement())
+  tahunAjaranId                      Int
+  tanggalMulai                       DateTime
+  tanggalAkhir                       DateTime
+  createdAt                          DateTime @default(now())
+  updatedAt                          DateTime @updatedAt
+
+  tahunAjaran TahunAjaran @relation(fields: [tahunAjaranId], references: [tahunAjaranId], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([tahunAjaranId, periodeKonfirmasiPemilihanSatkerId])
+}
+
+model PeriodePengumpulanLaporanMagang {
+  periodePengumpulanLaporanMagangId Int      @id @default(autoincrement())
+  tahunAjaranId                     Int
+  tanggalMulai                      DateTime
+  tanggalAkhir                      DateTime
+  createdAt                         DateTime @default(now())
+  updatedAt                         DateTime @updatedAt
+
+  tahunAjaran TahunAjaran @relation(fields: [tahunAjaranId], references: [tahunAjaranId], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([tahunAjaranId, periodePengumpulanLaporanMagangId])
+}
+
+model AccesAlokasiMagang {
+  id        Int      @id @default(autoincrement())
+  status    Boolean
+  roleId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  role Roles @relation(fields: [roleId], references: [roleId], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model Pengumuman {
+  id        Int      @id @default(autoincrement())
+  judul     String
+  deskripsi String
+  roleId    Int
+  groupId   Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  role Roles @relation(fields: [roleId], references: [roleId], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model DokumenTranslok {
+  id                  Int       @id @default(autoincrement())
+  bulan               DateTime?
+  fileDokumenTranslok String?
+  mahasiswaId         Int
+  status              String?   @default("menunggu")
+  catatan             String?
+  // statusRek           String?   @default("menunggu")
+  // catatanRek          String?
+  updateKe            Int       @default(0)
+  update              DateTime  @default(now())
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  mahasiswa Mahasiswa @relation(fields: [mahasiswaId], references: [mahasiswaId], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model Kabag {
+  id     Int    @id @default(autoincrement())
+  userId Int    @unique
+  nama   String
+  nip    String
+
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
+}
