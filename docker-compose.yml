@@ -44,6 +44,7 @@ services:
     ports:
       - "3001:3000"
     environment:
+      - PORT=3000
       - DATABASE_URL=postgresql://postgres:postgres@database:5432/cobaseeder?schema=public
     depends_on:
       - database
@@ -73,4 +74,3 @@ volumes:
 networks:
   magang-network:
     driver: bridge
-    
